@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Days</title>
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://wanglf.xyz/"/>
+  <updated>2016-06-20T06:20:24.000Z</updated>
+  <id>http://wanglf.xyz/</id>
+  
+  <author>
+    <name>Wang Lifeng</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>迁移Memcache</title>
+    <link href="http://wanglf.xyz/2016/06/20/migrate-memcache/"/>
+    <id>http://wanglf.xyz/2016/06/20/migrate-memcache/</id>
+    <published>2016-06-20T06:19:15.000Z</published>
+    <updated>2016-06-20T06:20:24.000Z</updated>
+    
+    <content type="html">&lt;h1 id=&quot;Memcache-迁移&quot;&gt;&lt;a href=&quot;#Memcache-迁移&quot; class=&quot;headerlink&quot; title=&quot;Memcache 迁移&quot;&gt;&lt;/a&gt;Memcache 迁移&lt;/h1&gt;&lt;p&gt;上星期对存储session的2台Memcache服务器进行了更换并扩容，由原来的2台服务器2个实例扩展到4台服务器16个实例。并且对cache的hash算法由原来的default-hash改为一致hash。&lt;/p&gt;
+&lt;h2 id=&quot;warm-up-cache&quot;&gt;&lt;a href=&quot;#warm-up-cache&quot; class=&quot;headerlink&quot; title=&quot;warm up cache&quot;&gt;&lt;/a&gt;warm up cache&lt;/h2&gt;&lt;p&gt;在迁移之前首先是尝试将原来cache里的数据dump出来，用于预热新的cache。在尝试dump Memcache的数据时，尝试了memdump，memcache-tool，php以及peep。&lt;/p&gt;
+&lt;p&gt;###memdump&lt;br&gt;memdump命令libmemcached提供的工具，可以导出指定memcache的key&lt;br&gt;通过memdump -h选项查看memdump的所有选项&lt;br&gt;memdump v1.0&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Dump all values from one or many servers.
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Current options. A ‘=’ means the option takes a value.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;--version 
+       Display the version of the application and then exit.
+--help 
+       Display this message and then exit.
+--quiet 
+       stderr and stdin will be closed at application startup.
+--verbose 
+       Give more details on the progression of the application.
+--debug 
+       Provide output only useful for debugging.
+--servers=
+       List which servers you wish to connect to.
+--hash=
+       Select hash type.
+--binary 
+       Switch to binary protocol.
+--username=
+       Username to use for SASL authentication
+--password=
+       Password to use for SASL authentication
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;/memdump –servers=127.0.0.1:11211,127.0.0.1:11212&lt;br&gt;将端口号为11211和11212的memcache的key导出到stdout&lt;br&gt;但在实际使用时发现该命令并不能将所有的key都dump出来，而是每个slab最多导出2MB的key。&lt;/p&gt;
+&lt;h3 id=&quot;memcache-tool&quot;&gt;&lt;a href=&quot;#memcache-tool&quot; class=&quot;headerlink&quot; title=&quot;memcache-tool&quot;&gt;&lt;/a&gt;memcache-tool&lt;/h3&gt;&lt;p&gt;memcahce-tool是用perl写的memcache的管理工具&lt;/p&gt;
+&lt;h3 id=&quot;php&quot;&gt;&lt;a href=&quot;#php&quot; class=&quot;headerlink&quot; title=&quot;php&quot;&gt;&lt;/a&gt;php&lt;/h3&gt;&lt;h3 id=&quot;peep&quot;&gt;&lt;a href=&quot;#peep&quot; class=&quot;headerlink&quot; title=&quot;peep&quot;&gt;&lt;/a&gt;peep&lt;/h3&gt;&lt;p&gt;cachedump命令&lt;br&gt;memcache的cachedump命令用于导出指定slabs id的key,其指令为&lt;br&gt;‘’ stats cachedump &lt;slabs_id&gt; &lt;limit&gt;\r\n&lt;br&gt;其中 slabs_id 为要导出的slab的class id&lt;br&gt;limit为要导出的key的数量，如果为0则导出全部或2MB大小的key&lt;br&gt;~~ stats cachedump 4 0&lt;br&gt;输出的结果为&lt;br&gt;‘’ ITEM key_7abc8b445c35d211046a856f946dde96a8b48bf8 [172 b; 1293184017 s]&lt;br&gt;‘’ ITEM key_da39a3ee5e6b4b0d3255bfef95601890afd80709 [173 b; 1293183894 s]&lt;br&gt;‘’ ITEM key_b858a87c07b04c4568f51b0dce655f78d73c02b3 [178 b; 1289314215 s]&lt;br&gt;‘’ ITEM key_eadcd9bd2a09c75aef04954e6799e50278ee124a [173 b; 1293186833 s]&lt;br&gt;‘’ ITEM key_fa3a0c6f483fb9e1cf9b5d7e4aa224c541dcf618 [167 b; 1289314215 s]&lt;br&gt;‘’ END&lt;br&gt;其输出格式为&lt;br&gt;‘’ ITEM &lt;item_key&gt; [&lt;item_size&gt; b; &lt;expiration_timestamp&gt; s]&lt;/expiration_timestamp&gt;&lt;/item_size&gt;&lt;/item_key&gt;&lt;/limit&gt;&lt;/slabs_id&gt;&lt;/p&gt;
+&lt;p&gt;&lt;item_key&gt; : The item key&lt;/item_key&gt;&lt;/p&gt;
+&lt;p&gt;&lt;item_size&gt; : Item size (including key) in bytes&lt;/item_size&gt;&lt;/p&gt;
+&lt;p&gt;&lt;expiration_timestamp&gt; : Expiration timestamp in second&lt;/expiration_timestamp&gt;&lt;/p&gt;
+&lt;p&gt;但经过调查之后现在不能将所有的数据dump出来，&lt;br&gt;主要用到的工具是memdump&lt;br&gt;而memdump用的是cachedump,但这个存在一个2M的限制&lt;/p&gt;
+&lt;p&gt;##一致性hash&lt;br&gt;在将默认的hash算法改为一致性hash时通过ini_set将mem_xxx设置为true，在cacheutil中也设置为相应的一致性hash，由于ini_set只有一个开或关的选项，因此不确定其hash算法是否与cacheutil中设置的一致。开始&lt;/p&gt;
+&lt;p&gt;在迁移的过程中也遇到了一些问题libketama&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;Memcache-迁移&quot;&gt;&lt;a href=&quot;#Memcache-迁移&quot; class=&quot;headerlink&quot; title=&quot;Memcache 迁移&quot;&gt;&lt;/a&gt;Memcache 迁移&lt;/h1&gt;&lt;p&gt;上星期对存储session的2台Memcache服务器进行了更换并扩
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Hello World</title>
+    <link href="http://wanglf.xyz/2016/06/19/hello-world/"/>
+    <id>http://wanglf.xyz/2016/06/19/hello-world/</id>
+    <published>2016-06-19T11:02:25.000Z</published>
+    <updated>2016-06-19T11:02:25.000Z</updated>
+    
+    <content type="html">&lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.io/docs/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;documentation&lt;/a&gt; for more info. If you get any problems when using Hexo, you can find the answer in &lt;a href=&quot;https://hexo.io/docs/troubleshooting.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;troubleshooting&lt;/a&gt; or you can ask me on &lt;a href=&quot;https://github.com/hexojs/hexo/issues&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;GitHub&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&quot;Quick-Start&quot;&gt;&lt;a href=&quot;#Quick-Start&quot; class=&quot;headerlink&quot; title=&quot;Quick Start&quot;&gt;&lt;/a&gt;Quick Start&lt;/h2&gt;&lt;h3 id=&quot;Create-a-new-post&quot;&gt;&lt;a href=&quot;#Create-a-new-post&quot; class=&quot;headerlink&quot; title=&quot;Create a new post&quot;&gt;&lt;/a&gt;Create a new post&lt;/h3&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;$ hexo new &lt;span class=&quot;string&quot;&gt;&quot;My New Post&quot;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;More info: &lt;a href=&quot;https://hexo.io/docs/writing.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Writing&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&quot;Run-server&quot;&gt;&lt;a href=&quot;#Run-server&quot; class=&quot;headerlink&quot; title=&quot;Run server&quot;&gt;&lt;/a&gt;Run server&lt;/h3&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;$ hexo server&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;More info: &lt;a href=&quot;https://hexo.io/docs/server.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Server&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&quot;Generate-static-files&quot;&gt;&lt;a href=&quot;#Generate-static-files&quot; class=&quot;headerlink&quot; title=&quot;Generate static files&quot;&gt;&lt;/a&gt;Generate static files&lt;/h3&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;$ hexo generate&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;More info: &lt;a href=&quot;https://hexo.io/docs/generating.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Generating&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&quot;Deploy-to-remote-sites&quot;&gt;&lt;a href=&quot;#Deploy-to-remote-sites&quot; class=&quot;headerlink&quot; title=&quot;Deploy to remote sites&quot;&gt;&lt;/a&gt;Deploy to remote sites&lt;/h3&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;$ hexo deploy&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;More info: &lt;a href=&quot;https://hexo.io/docs/deployment.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Deployment&lt;/a&gt;&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.
+    
+    </summary>
+    
+    
+  </entry>
+  
+</feed>

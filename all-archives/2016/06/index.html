@@ -5,20 +5,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="generator" content="Hexo">
-    <title>Archives: 2016/6 - Hexo</title>
-    <meta name="author" content="John Doe">
+    <meta name="generator" content="Days">
+    <title>Archivos: 2016/6 - Days</title>
+    <meta name="author" content="Wang Lifeng">
+    
+        <meta name="keywords" content="php,">
     
     
+    
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
     
     <meta name="description">
 <meta property="og:type" content="blog">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://yoursite.com/archives/2016/06/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:title" content="Days">
+<meta property="og:url" content="http://wanglf.xyz/all-archives/2016/06/index.html">
+<meta property="og:site_name" content="Days">
 <meta property="og:description">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexo">
+<meta name="twitter:title" content="Days">
 <meta name="twitter:description">
     
     
@@ -45,7 +49,7 @@
 <header id="header" data-behavior="2">
     <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
     <h1 class="header-title">
-        <a class="header-title-link" href="/ ">Hexo</a>
+        <a class="header-title-link" href="/ ">Days</a>
     </h1>
     
         
@@ -73,7 +77,7 @@
                     >
                 
                     <i class="sidebar-button-icon fa fa-lg fa-home"></i>
-                    <span class="sidebar-button-desc">Home</span>
+                    <span class="sidebar-button-desc">Inicio</span>
                 </a>
         </li>
         
@@ -85,7 +89,7 @@
                     >
                 
                     <i class="sidebar-button-icon fa fa-lg fa-bookmark"></i>
-                    <span class="sidebar-button-desc">Categories</span>
+                    <span class="sidebar-button-desc">Categorías</span>
                 </a>
         </li>
         
@@ -97,7 +101,7 @@
                     >
                 
                     <i class="sidebar-button-icon fa fa-lg fa-tags"></i>
-                    <span class="sidebar-button-desc">Tags</span>
+                    <span class="sidebar-button-desc">Etiquetas</span>
                 </a>
         </li>
         
@@ -109,7 +113,7 @@
                     >
                 
                     <i class="sidebar-button-icon fa fa-lg fa-archive"></i>
-                    <span class="sidebar-button-desc">Archives</span>
+                    <span class="sidebar-button-desc">Archivos</span>
                 </a>
         </li>
         
@@ -121,7 +125,7 @@
                     >
                 
                     <i class="sidebar-button-icon fa fa-lg fa-search"></i>
-                    <span class="sidebar-button-desc">Search</span>
+                    <span class="sidebar-button-desc">Buscar</span>
                 </a>
         </li>
         
@@ -133,7 +137,7 @@
                     >
                 
                     <i class="sidebar-button-icon fa fa-lg fa-question"></i>
-                    <span class="sidebar-button-desc">About</span>
+                    <span class="sidebar-button-desc">Acerca de</span>
                 </a>
         </li>
         
@@ -178,6 +182,81 @@
             <div class="postShorten-header">
                 <h1 class="postShorten-title" itemprop="headline">
                     
+                        <a class="link-unstyled" href="/2016/06/20/migrate-memcache/">
+                            迁移Memcache
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time itemprop="datePublished" datetime="2016-06-20T14:19:15+08:00">
+	
+		    20 Jun 2016
+    	
+    </time>
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content" itemprop="articleBody">
+                    <h1 id="Memcache-迁移"><a href="#Memcache-迁移" class="headerlink" title="Memcache 迁移"></a>Memcache 迁移</h1><p>上星期对存储session的2台Memcache服务器进行了更换并扩容，由原来的2台服务器2个实例扩展到4台服务器16个实例。并且对cache的hash算法由原来的default-hash改为一致hash。</p>
+<h2 id="warm-up-cache"><a href="#warm-up-cache" class="headerlink" title="warm up cache"></a>warm up cache</h2><p>在迁移之前首先是尝试将原来cache里的数据dump出来，用于预热新的cache。在尝试dump Memcache的数据时，尝试了memdump，memcache-tool，php以及peep。</p>
+<p>###memdump<br>memdump命令libmemcached提供的工具，可以导出指定memcache的key<br>通过memdump -h选项查看memdump的所有选项<br>memdump v1.0</p>
+<pre><code>Dump all values from one or many servers.
+</code></pre><p>Current options. A ‘=’ means the option takes a value.</p>
+<pre><code>--version 
+       Display the version of the application and then exit.
+--help 
+       Display this message and then exit.
+--quiet 
+       stderr and stdin will be closed at application startup.
+--verbose 
+       Give more details on the progression of the application.
+--debug 
+       Provide output only useful for debugging.
+--servers=
+       List which servers you wish to connect to.
+--hash=
+       Select hash type.
+--binary 
+       Switch to binary protocol.
+--username=
+       Username to use for SASL authentication
+--password=
+       Password to use for SASL authentication
+</code></pre><p>/memdump –servers=127.0.0.1:11211,127.0.0.1:11212<br>将端口号为11211和11212的memcache的key导出到stdout<br>但在实际使用时发现该命令并不能将所有的key都dump出来，而是每个slab最多导出2MB的key。</p>
+<h3 id="memcache-tool"><a href="#memcache-tool" class="headerlink" title="memcache-tool"></a>memcache-tool</h3><p>memcahce-tool是用perl写的memcache的管理工具</p>
+<h3 id="php"><a href="#php" class="headerlink" title="php"></a>php</h3><h3 id="peep"><a href="#peep" class="headerlink" title="peep"></a>peep</h3><p>cachedump命令<br>memcache的cachedump命令用于导出指定slabs id的key,其指令为<br>‘’ stats cachedump <slabs_id> <limit>\r\n<br>其中 slabs_id 为要导出的slab的class id<br>limit为要导出的key的数量，如果为0则导出全部或2MB大小的key<br>~~ stats cachedump 4 0<br>输出的结果为<br>‘’ ITEM key_7abc8b445c35d211046a856f946dde96a8b48bf8 [172 b; 1293184017 s]<br>‘’ ITEM key_da39a3ee5e6b4b0d3255bfef95601890afd80709 [173 b; 1293183894 s]<br>‘’ ITEM key_b858a87c07b04c4568f51b0dce655f78d73c02b3 [178 b; 1289314215 s]<br>‘’ ITEM key_eadcd9bd2a09c75aef04954e6799e50278ee124a [173 b; 1293186833 s]<br>‘’ ITEM key_fa3a0c6f483fb9e1cf9b5d7e4aa224c541dcf618 [167 b; 1289314215 s]<br>‘’ END<br>其输出格式为<br>‘’ ITEM <item_key> [<item_size> b; <expiration_timestamp> s]</expiration_timestamp></item_size></item_key></limit></slabs_id></p>
+<p><item_key> : The item key</item_key></p>
+<p><item_size> : Item size (including key) in bytes</item_size></p>
+<p><expiration_timestamp> : Expiration timestamp in second</expiration_timestamp></p>
+<p>但经过调查之后现在不能将所有的数据dump出来，<br>主要用到的工具是memdump<br>而memdump用的是cachedump,但这个存在一个2M的限制</p>
+<p>##一致性hash<br>在将默认的hash算法改为一致性hash时通过ini_set将mem_xxx设置为true，在cacheutil中也设置为相应的一致性hash，由于ini_set只有一个开或关的选项，因此不确定其hash算法是否与cacheutil中设置的一致。开始</p>
+<p>在迁移的过程中也遇到了一些问题libketama</p>
+
+                    
+                        
+                    
+                    
+                        <p>
+                            <a href="/2016/06/20/migrate-memcache/#post-footer" class="postShorten-excerpt_link link">
+                                Comentar y compartir
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom" itemscope itemType="http://schema.org/BlogPosting">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title" itemprop="headline">
+                    
                         <a class="link-unstyled" href="/2016/06/19/hello-world/">
                             Hello World
                         </a>
@@ -186,7 +265,7 @@
                 <div class="postShorten-meta">
     <time itemprop="datePublished" datetime="2016-06-19T19:02:25+08:00">
 	
-		    Jun 19, 2016
+		    19 Jun 2016
     	
     </time>
     
@@ -211,7 +290,7 @@
                     
                         <p>
                             <a href="/2016/06/19/hello-world/#post-footer" class="postShorten-excerpt_link link">
-                                Comment and share
+                                Comentar y compartir
                             </a>
                         </p>
                     
@@ -225,7 +304,7 @@
     <ul class="pagination">
         
         
-        <li class="pagination-number">page 1 of 1</li>
+        <li class="pagination-number">página 1 de 1</li>
     </ul>
 </div>
 
@@ -235,7 +314,7 @@
 
                 <footer id="footer" class="main-content-wrap">
     <span class="copyrights">
-        Copyrights &copy; 2016 John Doe. All Rights Reserved.
+        Copyrights &copy; 2016 Wang Lifeng. All Rights Reserved.
     </span>
 </footer>
 
@@ -251,7 +330,7 @@
             <i class="fa fa-remove"></i>
         </div>
         
-            <h4 id="about-card-name">John Doe</h4>
+            <h4 id="about-card-name">Wang Lifeng</h4>
         
             <h5 id="about-card-bio"><p>author.bio</p>
 </h5>
