@@ -16,18 +16,18 @@
         <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
     
     <meta name="description" content="Memcache 迁移上星期对存储session的2台Memcache服务器进行了更换并扩容，由原来的2台服务器2个实例扩展到4台服务器16个实例。并且对cache的hash算法由原来的default-hash改为一致hash。
-warm up cache在迁移之前首先是尝试将原来cache里的数据dump出来，用于预热新的cache。在尝试dump Memcache的数据时，尝试了memdump">
+warm up cache在迁移之前首先是尝试将原来cache里的数据dump出来，用于预热新的cache。dump原Memcache的数据时，尝试了memdump、me">
 <meta property="og:type" content="blog">
 <meta property="og:title" content="迁移Memcache">
 <meta property="og:url" content="http://wanglf.xyz/2016/06/20/migrate-memcache/index.html">
 <meta property="og:site_name" content="Days">
 <meta property="og:description" content="Memcache 迁移上星期对存储session的2台Memcache服务器进行了更换并扩容，由原来的2台服务器2个实例扩展到4台服务器16个实例。并且对cache的hash算法由原来的default-hash改为一致hash。
-warm up cache在迁移之前首先是尝试将原来cache里的数据dump出来，用于预热新的cache。在尝试dump Memcache的数据时，尝试了memdump">
-<meta property="og:updated_time" content="2016-06-20T06:20:24.000Z">
+warm up cache在迁移之前首先是尝试将原来cache里的数据dump出来，用于预热新的cache。dump原Memcache的数据时，尝试了memdump、me">
+<meta property="og:updated_time" content="2016-06-21T04:16:11.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="迁移Memcache">
 <meta name="twitter:description" content="Memcache 迁移上星期对存储session的2台Memcache服务器进行了更换并扩容，由原来的2台服务器2个实例扩展到4台服务器16个实例。并且对cache的hash算法由原来的default-hash改为一致hash。
-warm up cache在迁移之前首先是尝试将原来cache里的数据dump出来，用于预热新的cache。在尝试dump Memcache的数据时，尝试了memdump">
+warm up cache在迁移之前首先是尝试将原来cache里的数据dump出来，用于预热新的cache。dump原Memcache的数据时，尝试了memdump、me">
     
     
         
@@ -81,7 +81,7 @@ warm up cache在迁移之前首先是尝试将原来cache里的数据dump出来�
                     >
                 
                     <i class="sidebar-button-icon fa fa-lg fa-home"></i>
-                    <span class="sidebar-button-desc">Inicio</span>
+                    <span class="sidebar-button-desc">Home</span>
                 </a>
         </li>
         
@@ -93,7 +93,7 @@ warm up cache在迁移之前首先是尝试将原来cache里的数据dump出来�
                     >
                 
                     <i class="sidebar-button-icon fa fa-lg fa-bookmark"></i>
-                    <span class="sidebar-button-desc">Categorías</span>
+                    <span class="sidebar-button-desc">Categories</span>
                 </a>
         </li>
         
@@ -105,7 +105,7 @@ warm up cache在迁移之前首先是尝试将原来cache里的数据dump出来�
                     >
                 
                     <i class="sidebar-button-icon fa fa-lg fa-tags"></i>
-                    <span class="sidebar-button-desc">Etiquetas</span>
+                    <span class="sidebar-button-desc">Tags</span>
                 </a>
         </li>
         
@@ -117,7 +117,7 @@ warm up cache在迁移之前首先是尝试将原来cache里的数据dump出来�
                     >
                 
                     <i class="sidebar-button-icon fa fa-lg fa-archive"></i>
-                    <span class="sidebar-button-desc">Archivos</span>
+                    <span class="sidebar-button-desc">Archives</span>
                 </a>
         </li>
         
@@ -129,7 +129,7 @@ warm up cache在迁移之前首先是尝试将原来cache里的数据dump出来�
                     >
                 
                     <i class="sidebar-button-icon fa fa-lg fa-search"></i>
-                    <span class="sidebar-button-desc">Buscar</span>
+                    <span class="sidebar-button-desc">Search</span>
                 </a>
         </li>
         
@@ -141,7 +141,7 @@ warm up cache在迁移之前首先是尝试将原来cache里的数据dump出来�
                     >
                 
                     <i class="sidebar-button-icon fa fa-lg fa-question"></i>
-                    <span class="sidebar-button-desc">Acerca de</span>
+                    <span class="sidebar-button-desc">About</span>
                 </a>
         </li>
         
@@ -187,7 +187,7 @@ warm up cache在迁移之前首先是尝试将原来cache里的数据dump出来�
     <div class="post-meta">
     <time itemprop="datePublished" datetime="2016-06-20T14:19:15+08:00">
 	
-		    20 Jun 2016
+		    Jun 20, 2016
     	
     </time>
     
@@ -198,44 +198,68 @@ warm up cache在迁移之前首先是尝试将原来cache里的数据dump出来�
     <div class="post-content markdown" itemprop="articleBody">
         <div class="main-content-wrap">
             <h1 id="Memcache-迁移"><a href="#Memcache-迁移" class="headerlink" title="Memcache 迁移"></a>Memcache 迁移</h1><p>上星期对存储session的2台Memcache服务器进行了更换并扩容，由原来的2台服务器2个实例扩展到4台服务器16个实例。并且对cache的hash算法由原来的default-hash改为一致hash。</p>
-<h2 id="warm-up-cache"><a href="#warm-up-cache" class="headerlink" title="warm up cache"></a>warm up cache</h2><p>在迁移之前首先是尝试将原来cache里的数据dump出来，用于预热新的cache。在尝试dump Memcache的数据时，尝试了memdump，memcache-tool，php以及peep。</p>
-<p>###memdump<br>memdump命令libmemcached提供的工具，可以导出指定memcache的key<br>通过memdump -h选项查看memdump的所有选项<br>memdump v1.0</p>
-<pre><code>Dump all values from one or many servers.
-</code></pre><p>Current options. A ‘=’ means the option takes a value.</p>
-<pre><code>--version 
-       Display the version of the application and then exit.
+<h2 id="warm-up-cache"><a href="#warm-up-cache" class="headerlink" title="warm up cache"></a>warm up cache</h2><p>在迁移之前首先是尝试将原来cache里的数据dump出来，用于预热新的cache。dump原Memcache的数据时，尝试了memdump、memcache-tool、php以及peep。</p>
+<p>###memdump<br>memdump命令libmemcached提供的工具，可以导出指定memcache的key<br>通过memdump -h选项查看memdump的所有选项</p>
+<pre><code> --version 
+    Display the version of the application and then exit.
 --help 
-       Display this message and then exit.
+    Display this message and then exit.
 --quiet 
-       stderr and stdin will be closed at application startup.
+    stderr and stdin will be closed at application startup.
 --verbose 
-       Give more details on the progression of the application.
+    Give more details on the progression of the application.
 --debug 
-       Provide output only useful for debugging.
+    Provide output only useful for debugging.
 --servers=
-       List which servers you wish to connect to.
+    List which servers you wish to connect to.
 --hash=
-       Select hash type.
+    Select hash type.
 --binary 
-       Switch to binary protocol.
+    Switch to binary protocol.
 --username=
-       Username to use for SASL authentication
+    Username to use for SASL authentication
 --password=
-       Password to use for SASL authentication
-</code></pre><p>/memdump –servers=127.0.0.1:11211,127.0.0.1:11212<br>将端口号为11211和11212的memcache的key导出到stdout<br>但在实际使用时发现该命令并不能将所有的key都dump出来，而是每个slab最多导出2MB的key。</p>
-<h3 id="memcache-tool"><a href="#memcache-tool" class="headerlink" title="memcache-tool"></a>memcache-tool</h3><p>memcahce-tool是用perl写的memcache的管理工具</p>
-<h3 id="php"><a href="#php" class="headerlink" title="php"></a>php</h3><h3 id="peep"><a href="#peep" class="headerlink" title="peep"></a>peep</h3><p>cachedump命令<br>memcache的cachedump命令用于导出指定slabs id的key,其指令为<br>‘’ stats cachedump <slabs_id> <limit>\r\n<br>其中 slabs_id 为要导出的slab的class id<br>limit为要导出的key的数量，如果为0则导出全部或2MB大小的key<br>~~ stats cachedump 4 0<br>输出的结果为<br>‘’ ITEM key_7abc8b445c35d211046a856f946dde96a8b48bf8 [172 b; 1293184017 s]<br>‘’ ITEM key_da39a3ee5e6b4b0d3255bfef95601890afd80709 [173 b; 1293183894 s]<br>‘’ ITEM key_b858a87c07b04c4568f51b0dce655f78d73c02b3 [178 b; 1289314215 s]<br>‘’ ITEM key_eadcd9bd2a09c75aef04954e6799e50278ee124a [173 b; 1293186833 s]<br>‘’ ITEM key_fa3a0c6f483fb9e1cf9b5d7e4aa224c541dcf618 [167 b; 1289314215 s]<br>‘’ END<br>其输出格式为<br>‘’ ITEM <item_key> [<item_size> b; <expiration_timestamp> s]</expiration_timestamp></item_size></item_key></limit></slabs_id></p>
-<p><item_key> : The item key</item_key></p>
-<p><item_size> : Item size (including key) in bytes</item_size></p>
-<p><expiration_timestamp> : Expiration timestamp in second</expiration_timestamp></p>
-<p>但经过调查之后现在不能将所有的数据dump出来，<br>主要用到的工具是memdump<br>而memdump用的是cachedump,但这个存在一个2M的限制</p>
-<p>##一致性hash<br>在将默认的hash算法改为一致性hash时通过ini_set将mem_xxx设置为true，在cacheutil中也设置为相应的一致性hash，由于ini_set只有一个开或关的选项，因此不确定其hash算法是否与cacheutil中设置的一致。开始</p>
-<p>在迁移的过程中也遇到了一些问题libketama</p>
+    Password to use for SASL authentication
+</code></pre><p>例如如果要将127.0.0.1上的11211及11212上的数据dump出来，则命令为：</p>
+<pre><code>memdump --servers=127.0.0.1:11211,127.0.0.1:11212 &gt;keys
+</code></pre><p>将端口号为11211和11212的memcache的key导出到stdout<br>但在实际使用时发现该命令并不能将所有的key都dump出来，而是每个slab最多导出2MB的key。</p>
+<p>###memcache-tool<br>memcahce-tool是用perl写的memcache的管理工具</p>
+<pre><code>memcached-tool host:port dump &gt;key-values
+</code></pre><p>memcached-tool的dump命令直接将对应的key,value导出并以memcache插入命令的形式组织数据，其格式如下：</p>
+<pre><code>add 19bc2701c3898279jkds1jklc272b35f 0 1413178136 506
+a:3:{s:4:&quot;text&quot;;..................}
+</code></pre><p>使用nc将dump的数据直接插入到新的memcache中。</p>
+<pre><code>nc new-host:port &lt;key-values
+</code></pre><p>###php</p>
+<p>###peep</p>
+<p>cachedump命令<br>memcache的cachedump命令用于导出指定slabs id的key,其指令为<br>‘’ stats cachedump <slabs_id> <limit>\r\n<br>其中 slabs_id 为要导出的slab的class id<br>limit为要导出的key的数量，如果为0则导出全部或2MB大小的key</limit></slabs_id></p>
+<pre><code>stats cachedump 4 0
+</code></pre><p>输出的结果为</p>
+<pre><code>ITEM key_7abc8b445c35d211046a856f946dde96a8b48bf8 [172 b; 1293184017 s] 
+ITEM key_da39a3ee5e6b4b0d3255bfef95601890afd80709 [173 b; 1293183894 s] 
+ITEM key_b858a87c07b04c4568f51b0dce655f78d73c02b3 [178 b; 1289314215 s] 
+ITEM key_eadcd9bd2a09c75aef04954e6799e50278ee124a [173 b; 1293186833 s] 
+ITEM key_fa3a0c6f483fb9e1cf9b5d7e4aa224c541dcf618 [167 b; 1289314215 s] 
+END
+</code></pre><p>其输出格式为</p>
+<pre><code>ITEM &lt;item_key&gt; [&lt;item_size&gt; b; &lt;expiration_timestamp&gt; s]
+&lt;item_key&gt; : The item key
+&lt;item_size&gt; : Item size (including key) in bytes
+&lt;expiration_timestamp&gt; : Expiration timestamp in second
+</code></pre><p>但是在使用之后发现该命令并不能将所有的数据dump出来，<br>主要用到的工具是memdump<br>而memdump用的是cachedump,但这个存在一个2M的限制</p>
+<p>##一致性hash<br>在将默认的hash算法改为一致性hash时通过ini_set将memcached.sess_conssistent_has设置为1。相应的配置及含义在<a href="http://php.net/manual/en/memcached.configuration.php" target="_blank" rel="external">http://php.net/manual/en/memcached.configuration.php</a>。ini_set对memcache的一致性hash只有一个开或关的选项，没有其他参数用于指定具体的hash算法，通过查询php的源代码发现其使用md5 hash算法，并开启OPT_LIBKETAMA_COMPATIBLE。<br>但在使用时发现使用相同hash算法的CacheUtil无法拿到对应的session。通过排查及实现后发现在每次使用CacheUtil时，需要在使用前重新指定hash算法，详见<br><a href="http://hoborglabs.com/en/blog/2013/memcached-php" target="_blank" rel="external">http://hoborglabs.com/en/blog/2013/memcached-php</a></p>
 
             
         </div>
     </div>
     <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-link" href="/all-tags/memcache/">memcache</a>
+
+            </div>
         
         <div class="post-actions-wrap">
     <nav>
@@ -245,14 +269,14 @@ warm up cache在迁移之前首先是尝试将原来cache里的数据dump出来�
                     <a class="post-action-btn btn btn--disabled">
                 
                     <i class="fa fa-angle-left"></i>
-                    <span class="hide-xs hide-sm text-small icon-ml">ANTERIOR</span>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
                 </a>
             </li>
             <li class="post-action">
                 
                     <a class="post-action-btn btn btn--default tooltip--top" href="/2016/06/19/hello-world/" data-tooltip="Hello World">
                 
-                    <span class="hide-xs hide-sm text-small icon-mr">SIGUIENTE</span>
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
                     <i class="fa fa-angle-right"></i>
                 </a>
             </li>
@@ -316,14 +340,14 @@ warm up cache在迁移之前首先是尝试将原来cache里的数据dump出来�
                     <a class="post-action-btn btn btn--disabled">
                 
                     <i class="fa fa-angle-left"></i>
-                    <span class="hide-xs hide-sm text-small icon-ml">ANTERIOR</span>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
                 </a>
             </li>
             <li class="post-action">
                 
                     <a class="post-action-btn btn btn--default tooltip--top" href="/2016/06/19/hello-world/" data-tooltip="Hello World">
                 
-                    <span class="hide-xs hide-sm text-small icon-mr">SIGUIENTE</span>
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
                     <i class="fa fa-angle-right"></i>
                 </a>
             </li>
@@ -367,17 +391,17 @@ warm up cache在迁移之前首先是尝试将原来cache里的数据dump出来�
     <ul class="share-options">
         <li class="share-option">
             <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://wanglf.xyz/2016/06/20/migrate-memcache/">
-                <i class="fa fa-google-plus"></i><span class="">Compartir en Google Plus</span>
+                <i class="fa fa-google-plus"></i><span class="">Share on Google Plus</span>
             </a>
         </li>
         <li class="share-option">
             <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://wanglf.xyz/2016/06/20/migrate-memcache/">
-                <i class="fa fa-facebook-official"></i><span>Compartir en Facebook</span>
+                <i class="fa fa-facebook-official"></i><span>Share on Facebook</span>
             </a>
         </li>
         <li class="share-option">
             <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://wanglf.xyz/2016/06/20/migrate-memcache/">
-                <i class="fa fa-twitter"></i><span>Compartir en Twitter</span>
+                <i class="fa fa-twitter"></i><span>Share on Twitter</span>
             </a>
         </li>
     </ul>
